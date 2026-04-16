@@ -1,0 +1,29 @@
+{
+  "name": "express-js-poc",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx watch src/app.ts"
+  },
+  "keywords": [],
+  "author": "Gene Santiago",
+  "license": "ISC",
+  "dependencies": {
+    "argon2": "^0.44.0",
+    "autocannon": "^8.0.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.20.0",
+    "tsx": "^4.21.0",
+    "uuid": "^13.0.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/pg": "^8.20.0"
+  }
+}
