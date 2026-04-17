@@ -11,41 +11,64 @@ const UserService = {
     userData.password = await argon2.hash(userData.password);
     userData.mobileNumber = userData.mobileNumber.trim();
 
-    const existingUserResult = userData.userId ? await UserRepository.findByUserId(userData.userId)
-    : await UserRepository.findByMobileNumber(userData.mobileNumber);
+    const existingUserResult = userData.userId
+      ? await UserRepository.findByUserId(userData.userId)
+      : await UserRepository.findByMobileNumber(userData.mobileNumber);
 
-    if (existingUserResult) 
-      throw new ClientError("User with this mobile number already exists.", 400, requestData as any);
-    
+    if (existingUserResult)
+      throw new ClientError(
+        "User with this mobile number already exists.",
+        400,
+        requestData as any,
+      );
+
     const newUser = await UserRepository.registerUser(userData);
 
     if (!newUser)
-      throw new ClientError("User registration failed. User already exists.", 500, userData as any);
+      throw new ClientError(
+        "User registration failed. User already exists.",
+        500,
+        userData as any,
+      );
 
     await WalletRepository.registerWallet(newUser.id);
   },
   login: async (userData: IUser) => {
     const requestData = userData;
 
-    userData.mobileNumber = userData.mobileNumber.trim();
-
     const existingUserResult = userData.userId
       ? await UserRepository.findByUserId(userData.userId)
       : await UserRepository.findByMobileNumber(userData.mobileNumber);
 
-    console.log(existingUserResult.password, userData.password);
+    if (!existingUserResult)
+      throw new ClientError(
+        "User with this mobile number/ID does not exist.",
+        404,
+        requestData as any,
+      );
 
-    const passwordMatch = await argon2.verify(existingUserResult.password, userData.password);
+    console.log(`existingUserResult.password: ${existingUserResult.password}`);
+    console.log(`userData.password: ${userData.password}`);
 
-    if (!passwordMatch) throw new ClientError("Invalid password.", 401, requestData as any);
-        
-    if (!existingUserResult) 
-        throw new ClientError("User with this mobile number/ID does not exist.", 404, requestData as any);
+    const passwordMatch = await argon2.verify(
+      existingUserResult.password,
+      userData.password,
+    );
 
-    const walletDetails = await WalletRepository.findWalletById(existingUserResult.id);
+    if (!passwordMatch)
+      throw new ClientError("Invalid password.", 401, requestData as any);
 
-    if (!walletDetails) throw new ClientError("Wallet not found for this user.", 404, requestData as any);
-    
+    const walletDetails = await WalletRepository.findWalletById(
+      existingUserResult.id,
+    );
+
+    if (!walletDetails)
+      throw new ClientError(
+        "Wallet not found for this user.",
+        404,
+        requestData as any,
+      );
+
     delete existingUserResult.password;
 
     return { ...existingUserResult, wallet: walletDetails };
