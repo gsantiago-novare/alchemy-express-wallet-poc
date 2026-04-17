@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "tsx watch src/app.ts"
+    "start": "tsx watch src/app.ts",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
   },
   "keywords": [],
   "author": "Gene Santiago",
@@ -19,11 +22,16 @@
     "pg": "^8.20.0",
     "tsx": "^4.21.0",
     "uuid": "^13.0.0",
+    "vitest": "^4.1.4",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/pg": "^8.20.0"
+    "@types/pg": "^8.20.0",
+    "@types/supertest": "^7.2.0",
+    "@vitest/coverage-v8": "^4.1.4",
+    "@vitest/ui": "^4.1.4",
+    "supertest": "^7.2.2"
   }
 }
