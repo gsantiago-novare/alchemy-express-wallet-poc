@@ -21,8 +21,8 @@ const UserRepository = {
 
       return result.rows[0];
     } catch (error) {
-        console.error("Error inserting user:", error);
-        throw new ServerError("Failed to insert user");
+      console.error("Error inserting user:", error);
+      throw new ServerError("Failed to insert user");
     } finally {
       dbConn?.release();
     }
@@ -39,8 +39,8 @@ const UserRepository = {
 
       return result.rows[0];
     } catch (error) {
-        console.error("Error finding user:", error);
-        throw new ServerError("Failed to find user");
+      console.error("Error finding user:", error);
+      throw new ServerError("Failed to find user");
     } finally {
       dbConn?.release();
     }
@@ -63,12 +63,31 @@ const UserRepository = {
       dbConn?.release();
     }
   },
+  findByUsername: async (username: string) => {
+    let dbConn;
+    try {
+      dbConn = await DatabaseConnection.connect();
+
+      const selectQuery = "SELECT * FROM users WHERE username = $1";
+      const result = await dbConn.query(selectQuery, [username]);
+
+      console.log("UserRepository.findByUsername:", result.rows[0]);
+
+      return result.rows[0];
+    } catch (error) {
+      console.error("Error finding user:", error);
+      throw new ServerError("Failed to find user");
+    } finally {
+      dbConn?.release();
+    }
+  },
   findByUserIdAndNumber: async (userId: number, mobileNumber: string) => {
     let dbConn;
     try {
       dbConn = await DatabaseConnection.connect();
 
-      const selectQuery = "SELECT * FROM users WHERE id = $1 AND mobile_number = $2";
+      const selectQuery =
+        "SELECT * FROM users WHERE id = $1 AND mobile_number = $2";
       const result = await dbConn.query(selectQuery, [userId, mobileNumber]);
 
       console.log("UserRepository.findByUserIdAndNumber:", result.rows[0]);

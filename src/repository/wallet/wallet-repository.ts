@@ -13,8 +13,8 @@ const WalletRepository = {
       dbConn = await DatabaseConnection.connect();
 
       const insertQuery =
-        "INSERT INTO wallets (user_id) VALUES ($1) RETURNING *";
-      const result = await dbConn.query(insertQuery, [userId]);
+        "INSERT INTO wallets (user_id, balance, currency) VALUES ($1, $2, $3) RETURNING *";
+      const result = await dbConn.query(insertQuery, [userId, 1000, "PHP"]);
 
       return result.rows[0];
     } catch (error) {
@@ -51,6 +51,15 @@ const WalletRepository = {
 
       console.log("setting up update constraints");
 
+      const walletsCheck = await dbConn.query(
+        "SELECT id FROM wallets WHERE id IN ($1, $2)",
+        [senderWalletId, receiverWalletId],
+      );
+
+      if (walletsCheck.rows.length !== 2) {
+        throw new ClientError("Sender or receiver wallet not found.", 404);
+      }
+
       const [firstId, secondId] = [senderWalletId, receiverWalletId].sort(
         (a, b) => a - b,
       );
@@ -65,7 +74,14 @@ const WalletRepository = {
         [senderWalletId],
       );
 
-      if (senderCheck.rows[0].balance < amount) {
+      if (!senderCheck.rows[0]) {
+        throw new ClientError("Sender wallet not found.", 404);
+      }
+
+      console.log("SENDER CHECK VALUES: ", senderCheck);
+
+      const senderBalance = Number.parseFloat(senderCheck.rows[0].balance);
+      if (senderBalance < amount) {
         throw new ClientError("Insufficient funds.", 422);
       }
 
@@ -87,7 +103,7 @@ const WalletRepository = {
         amount,
         referenceNo,
         TransactionStatus.SUCCESS,
-        dbConn
+        dbConn,
       );
 
       await dbConn.query("COMMIT");
@@ -98,6 +114,9 @@ const WalletRepository = {
     } catch (error: any) {
       await dbConn.query("ROLLBACK");
       console.error("Error executing transfer:", error);
+      if (error instanceof ClientError) {
+        throw error;
+      }
       throw new ServerError("Transaction error: " + error.message, 500);
     } finally {
       dbConn?.release();

@@ -36,9 +36,17 @@ const UserService = {
   login: async (userData: IUser) => {
     const requestData = userData;
 
-    const existingUserResult = userData.userId
-      ? await UserRepository.findByUserId(userData.userId)
-      : await UserRepository.findByMobileNumber(userData.mobileNumber);
+    let existingUserResult;
+
+    if (userData.username) {
+      existingUserResult = await UserRepository.findByUsername(
+        userData.username,
+      );
+    } else if (userData.mobileNumber) {
+      existingUserResult = await UserRepository.findByMobileNumber(
+        userData.mobileNumber,
+      );
+    }
 
     if (!existingUserResult)
       throw new ClientError(

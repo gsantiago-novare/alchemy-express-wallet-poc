@@ -5,7 +5,7 @@ import {AuthenticationRouter} from "./routes/auth/index";
 import { TransactionRouter } from "./routes/transaction/index";
 
 const app: Express = express();
-const port: number = 3003;
+const port: number = 3000;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
