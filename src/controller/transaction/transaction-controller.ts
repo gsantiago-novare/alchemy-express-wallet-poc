@@ -15,7 +15,7 @@ const TransactionController = {
       res.status(201).json({ message: "Transfer completed successfully", data: result });
     } catch (error: any) {
       console.error("Error during money transfer:", error);
-      res.status(500).json({ message: error.message });
+      res.status(error.statusCode).json({ message: error.message });
     }
   },
 };

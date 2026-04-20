@@ -15,7 +15,7 @@ const LoginController = {
       res.status(200).json({ message: "User logged in successfully", data: loginDetails });
     } catch (error: any){
       console.error("Error during login:", error);
-      res.status(500).json({ message: error.message });
+      res.status(error.statusCode).json({ message: error.message });
     }
   },
 };

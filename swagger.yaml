@@ -1,0 +1,431 @@
+openapi: 3.0.0
+info:
+  title: Alchemy Hapi Wallet API
+  description: A wallet and transaction management API built with Hapi.js
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:3003
+    description: Local development server
+
+paths:
+  /hapi/test:
+    get:
+      summary: Test endpoint
+      description: Simple health check endpoint to verify server is running
+      operationId: testEndpoint
+      tags:
+        - General
+      responses:
+        '200':
+          description: Server is running successfully
+          content:
+            text/html:
+              schema:
+                type: string
+                example: '<p>hapi.js test route</p>'
+
+  /hapi/authentication/registration:
+    post:
+      summary: Register a new user
+      description: Create a new user account and register a wallet
+      operationId: registerUser
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  minLength: 3
+                  maxLength: 50
+                  description: Username for the account
+                  example: johndoe
+                password:
+                  type: string
+                  minLength: 8
+                  description: Password for the account
+                  example: password123
+                mobileNumber:
+                  type: string
+                  pattern: '^09\d{9}$'
+                  description: Philippine mobile number (format 09xxxxxxxxx)
+                  example: '09123456789'
+              required:
+                - username
+                - password
+                - mobileNumber
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User registered successfully
+        '400':
+          description: Bad request - validation error or duplicate user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                validation_error:
+                  value:
+                    success: false
+                    statusCode: 400
+                    message: "Username must be at least 3 characters long."
+                duplicate_mobile:
+                  value:
+                    success: false
+                    statusCode: 400
+                    message: "User with this mobile number already exists."
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                statusCode: 500
+                message: "User registration failed. User already exists."
+
+  /hapi/authentication/login:
+    post:
+      summary: User login
+      description: Authenticate user with username or mobile number and password
+      operationId: login
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  minLength: 3
+                  description: Username (required if mobileNumber not provided)
+                  example: johndoe
+                mobileNumber:
+                  type: string
+                  pattern: '^09\d{9}$'
+                  description: Philippine mobile number (required if username not provided)
+                  example: '09123456789'
+                password:
+                  type: string
+                  minLength: 8
+                  description: Password for the account
+                  example: password123
+              required:
+                - password
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User logged in successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: number
+                      username:
+                        type: string
+                      mobile_number:
+                        type: string
+                      wallet:
+                        type: object
+                        properties:
+                          id:
+                            type: number
+                          user_id:
+                            type: number
+                          balance:
+                            type: string
+                          currency:
+                            type: string
+        '400':
+          description: Bad request - validation error or missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missing_password:
+                  value:
+                    success: false
+                    statusCode: 400
+                    message: "Password is required."
+                missing_credentials:
+                  value:
+                    success: false
+                    statusCode: 400
+                    message: "Either username or mobileNumber must be present."
+        '401':
+          description: Unauthorized - invalid password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                statusCode: 401
+                message: "Invalid password."
+        '404':
+          description: User or wallet not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                user_not_found:
+                  value:
+                    success: false
+                    statusCode: 404
+                    message: "User with this mobile number/ID does not exist."
+                wallet_not_found:
+                  value:
+                    success: false
+                    statusCode: 404
+                    message: "Wallet not found for this user."
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /hapi/transaction/transfer:
+    post:
+      summary: Transfer money between wallets
+      description: Transfer funds from one wallet to another with transactional consistency
+      operationId: transferMoney
+      tags:
+        - Transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                senderWalletId:
+                  type: integer
+                  format: int32
+                  minimum: 1
+                  description: ID of the sender's wallet
+                  example: 1
+                receiverWalletId:
+                  type: integer
+                  format: int32
+                  minimum: 1
+                  description: ID of the receiver's wallet (must be different from sender)
+                  example: 2
+                amount:
+                  type: number
+                  format: double
+                  minimum: 0
+                  exclusiveMinimum: true
+                  description: Amount to transfer
+                  example: 100.50
+              required:
+                - senderWalletId
+                - receiverWalletId
+                - amount
+      responses:
+        '201':
+          description: Transfer completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Transfer completed successfully
+                  data:
+                    type: object
+                    properties:
+                      senderResult:
+                        type: object
+                        properties:
+                          id:
+                            type: number
+                          user_id:
+                            type: number
+                          balance:
+                            type: string
+                          currency:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+                      receiverResult:
+                        type: object
+                        properties:
+                          id:
+                            type: number
+                          user_id:
+                            type: number
+                          balance:
+                            type: string
+                          currency:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                same_wallet:
+                  value:
+                    success: false
+                    statusCode: 400
+                    message: "Sender and receiver cannot be the same wallet."
+                invalid_amount:
+                  value:
+                    success: false
+                    statusCode: 400
+                    message: "Amount must be greater than 0"
+        '404':
+          description: Wallet not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                sender_not_found:
+                  value:
+                    success: false
+                    statusCode: 404
+                    message: "Sender wallet not found."
+                receiver_not_found:
+                  value:
+                    success: false
+                    statusCode: 404
+                    message: "Receiver wallet not found."
+        '422':
+          description: Unprocessable entity - insufficient funds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                statusCode: 422
+                message: "Insufficient funds."
+        '500':
+          description: Internal server error or transaction failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                statusCode: 500
+                message: "Transaction error: [error details]"
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Error message describing what went wrong
+
+    User:
+      type: object
+      properties:
+        userId:
+          type: number
+          description: Unique user identifier
+        username:
+          type: string
+          description: User's username
+        mobileNumber:
+          type: string
+          description: User's mobile number
+        walletId:
+          type: number
+          description: Associated wallet ID
+        walletBalance:
+          type: number
+          description: Current wallet balance
+
+    Wallet:
+      type: object
+      properties:
+        id:
+          type: number
+          description: Unique wallet identifier
+        user_id:
+          type: number
+          description: Associated user ID
+        balance:
+          type: number
+          description: Current balance
+        currency:
+          type: string
+          description: Currency code
+          example: PHP
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: number
+          description: Unique transaction identifier
+        sender_wallet_id:
+          type: number
+          description: Sender's wallet ID
+        receiver_wallet_id:
+          type: number
+          description: Receiver's wallet ID
+        amount:
+          type: number
+          description: Transaction amount
+        reference_no:
+          type: string
+          format: uuid
+          description: Unique reference number for the transaction
+        status:
+          type: string
+          enum: [SUCCESS, PENDING, FAILED]
+          description: Transaction status
+
+tags:
+  - name: General
+    description: General endpoints
+  - name: Authentication
+    description: User registration and login endpoints
+  - name: Transaction
+    description: Transaction and wallet transfer endpoints
