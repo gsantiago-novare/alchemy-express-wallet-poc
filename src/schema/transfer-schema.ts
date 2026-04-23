@@ -17,7 +17,6 @@ const TransferSchema = z.object({
     })
     .refine((data) => data.senderWalletId !== data.receiverWalletId, {
       message: "Sender and receiver cannot be the same wallet.",
-      path: ["receiverWalletId"],
     }),
 });
 

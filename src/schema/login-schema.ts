@@ -11,7 +11,6 @@ const LoginSchema = z.object({
     })
     .refine((data) => data.username || data.mobileNumber, {
         message: "Either username or mobileNumber must be present.",
-        path: ["username"], 
     }),
 });
 

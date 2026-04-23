@@ -15,17 +15,20 @@ const validate =
       return next();
     } catch (error) {
       if (error instanceof ZodError) {
+        const message = error.issues.map((issue) => issue.message).join(", ");
         return res.status(400).json({
-          status: "Validation failed.",
-          errors: error.issues.map((issue) => ({
-            path: issue.path.join("."),
-            message: issue.message,
-          })),
+          success: false,
+          statusCode: 400,
+          message: message,
         });
       }
 
       console.error("Validation logic error:", error);
-      return res.status(500).json({ message: "Internal Server Error" });
+      return res.status(500).json({
+        success: false,
+        statusCode: 500,
+        message: "Internal Server Error",
+      });
     }
   };
 
