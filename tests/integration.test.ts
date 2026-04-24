@@ -325,6 +325,10 @@ describe("Integration Tests - Database", () => {
 			// Register first with plain password (service will hash it)
 			await UserService.registerUser(userData as any);
 
+			// Get the registered user to verify
+			const registeredUser = await UserRepository.findByMobileNumber(userData.mobileNumber);
+			expect(registeredUser).toBeDefined();
+
 			// Login with plain password (service will verify hash)
 			const loginData = {
 				mobileNumber: userData.mobileNumber,
