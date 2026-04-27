@@ -1,0 +1,280 @@
+{
+  "info": {
+    "_postman_id": "ab06aacf-b228-4da2-aecb-b01434d48fb2",
+    "name": "Express.js Digital Wallet POC",
+    "description": "Comprehensive Postman collection based on Vitest unit tests for the Digital Wallet POC.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "10156009"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Registration - Success",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"testuser125\",\n    \"password\": \"password125\",\n    \"mobileNumber\": \"09170000005\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/express/authentication/registration",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "express",
+                "authentication",
+                "registration"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registration - FAIL (Invalid Mobile)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"testuser125\",\n    \"password\": \"password125\",\n    \"mobileNumber\": \"12345678901\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/express/authentication/registration",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "express",
+                "authentication",
+                "registration"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Success (Username)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"testuser125\",\n    \"password\": \"password125\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/express/authentication/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "express",
+                "authentication",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Success (Mobile)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"mobileNumber\": \"09170000005\",\n    \"password\": \"password125\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/express/authentication/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "express",
+                "authentication",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - FAIL (Not Found)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"nonexistent_user\",\n    \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/express/authentication/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "express",
+                "authentication",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Transfer - Success",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"senderWalletId\": 344,\n    \"receiverWalletId\": 345,\n    \"amount\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/express/transaction/transfer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "express",
+                "transaction",
+                "transfer"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Transfer - FAIL (Same Wallet ID)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"senderWalletId\": 344,\n    \"receiverWalletId\": 344,\n    \"amount\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/express/transaction/transfer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "express",
+                "transaction",
+                "transfer"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Transfer - FAIL (Negative Amount)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"senderWalletId\": 344,\n    \"receiverWalletId\": 345,\n    \"amount\": -50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/express/transaction/transfer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "express",
+                "transaction",
+                "transfer"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Transfer - FAIL (Insufficient Balance)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"senderWalletId\": 344,\n    \"receiverWalletId\": 345,\n    \"amount\": 99999999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/express/transaction/transfer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "express",
+                "transaction",
+                "transfer"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3003",
+      "type": "string"
+    }
+  ]
+}
